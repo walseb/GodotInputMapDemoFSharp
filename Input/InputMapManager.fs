@@ -8,7 +8,7 @@ open Chessie.ErrorHandling
 open RailwayUtils
 open GodotUtils
 
-module configManagement =
+module ConfigManagement =
     let configPath = "user://input.cfg"
 
     let HandleLoadError (error : Error) =
@@ -24,17 +24,17 @@ module configManagement =
     let WriteConfigToFileSystem (config : ConfigFile) =
         HandleLoadError (config.Save(configPath))
 
-    let clearDuplicateInputMapEvents actionName =
+    let ClearDuplicateInputMapEvents actionName =
         let removeEvent actionName (eventToRemove : InputEvent)  =
             InputMap.ActionEraseEvent(actionName, eventToRemove)
 
         InputMap.GetActionList(actionName)
         |> Array.iter (fun currentEvent -> if currentEvent :? InputEventKey then removeEvent actionName (currentEvent :?> InputEventKey))
 
-    let addEventToInputMap actionName event =
+    let AddEventToInputMap actionName event =
         InputMap.ActionAddEvent(actionName, event)
 
-    let getDefaultConfig ( config: ConfigFile) : ConfigFile=
+    let GetDefaultConfig ( config: ConfigFile) : ConfigFile=
         let addActionNameToConfig (config : ConfigFile) actionName controllerLayerIndex =
             let inputEvent = InputMap.GetActionList(actionName).[controllerLayerIndex]
             if inputEvent :? InputEventKey then
@@ -47,7 +47,7 @@ module configManagement =
         |> Array.iter (fun actionName -> addActionNameToConfig config actionName 0)
         config
 
-    let copyConfigToInputMap (config : ConfigFile) : ConfigFile =
+    let CopyConfigToInputMap (config : ConfigFile) : ConfigFile =
         let addActionToInputMap (config : ConfigFile) actionName =
             let createEvent scancode =
                 let newEvent = new InputEventKey();
@@ -61,11 +61,11 @@ module configManagement =
                 | null -> fail ("No such action in config: " + actionName)
                 | _ -> OS.FindScancodeFromString(scancodeString) |> ok
 
-            clearDuplicateInputMapEvents actionName
+            ClearDuplicateInputMapEvents actionName
 
             getScancodeIfActionExists config actionName
             |> map createEvent
-            |> map (addEventToInputMap actionName)
+            |> map (AddEventToInputMap actionName)
 
         PlayerInputActions.allActionNames
         |> Array.iter (fun string -> addActionToInputMap config string |> log |> ignore)
@@ -76,19 +76,19 @@ type ConfigManager() =
     static member LoadOrCreateConfig : unit =
         let load (config : ConfigFile) =
             config
-            |> configManagement.copyConfigToInputMap
+            |> ConfigManagement.CopyConfigToInputMap
             |> ignore
 
         let create (config : ConfigFile) =
             config
-            |> configManagement.getDefaultConfig
-            |> configManagement.copyConfigToInputMap
-            |> configManagement.WriteConfigToFileSystem
+            |> ConfigManagement.GetDefaultConfig
+            |> ConfigManagement.CopyConfigToInputMap
+            |> ConfigManagement.WriteConfigToFileSystem
             |> ignore
 
         let config = new ConfigFile()
 
-        match config.Load(configManagement.configPath) with
+        match config.Load(ConfigManagement.configPath) with
         | Error.Ok ->
             load config
         | _ ->
@@ -113,7 +113,7 @@ type RebindMenu() as this =
     override this._Input(inputEvent : InputEvent) =
         let updateKey (inputEventKey : InputEventKey) =
             let updateConfigWithCurrentMaps (config : ConfigFile) =
-                configManagement.LoadConfigFromInputMap config |> log |> ignore
+                ConfigManagement.LoadConfigFromInputMap config |> log |> ignore
                 config
 
             let setValueInConfig action scancode (config : ConfigFile) : ConfigFile =
@@ -124,13 +124,13 @@ type RebindMenu() as this =
 
             (getButton action).Text <- scancode
 
-            configManagement.clearDuplicateInputMapEvents action
-            configManagement.addEventToInputMap action inputEvent
+            ConfigManagement.ClearDuplicateInputMapEvents action
+            ConfigManagement.AddEventToInputMap action inputEvent
 
             new ConfigFile()
             |> updateConfigWithCurrentMaps
             |> setValueInConfig action scancode
-            |> configManagement.WriteConfigToFileSystem
+            |> ConfigManagement.WriteConfigToFileSystem
 
         // If false, Input is not a key and is ignored
         match inputEvent :? InputEventKey with
