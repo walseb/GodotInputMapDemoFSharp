@@ -42,7 +42,6 @@ module ConfigManagement =
                         fail "Input is not bindable"
 
     module ScancodeHandling =
-
         let ScancodeToReadable (inputEvent : InputEvent) scancode =
             let ButtonIndexToReadable (buttonIndex : int) =
                 match buttonIndex with
