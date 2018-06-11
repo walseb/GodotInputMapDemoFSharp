@@ -7,12 +7,18 @@ module RailwayUtils
         bind (singleTrackFunction >> ok)
 
     let tee f x =
-        f x |> ignore
+        f x
+        |> ignore
         x
 
-    let switch f x =
-        f x |> Ok
-
     let log twoTrackInput =
-        let failure msgs = GD.Print (String.concat "ERROR. %A" msgs)
+        let failure msgs =
+            let message = (String.concat "" msgs)
+            GD.Print ("LOG: " + message)
+        failureTee failure twoTrackInput
+
+    let logErr twoTrackInput =
+        let failure msgs =
+            let message = (String.concat "" msgs)
+            GD.Print ("ERROR: " + message)
         failureTee failure twoTrackInput

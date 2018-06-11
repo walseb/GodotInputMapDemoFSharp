@@ -1,2 +1,2 @@
-using InputMapManager;
+using InputManager;
 public class RebindMenuWrap : RebindMenu {}
