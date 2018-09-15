@@ -268,7 +268,9 @@ type RebindMenu() as this =
                 inputEvent
                 |> changeButtonText actionName
                 |> map (fun button ->
-                        handleConnectError (button.Connect("pressed", this, "startPolling", [|actionName|]))
+                        let actionNameArray : Array = new Array()
+                        actionNameArray.Add actionName
+                        handleConnectError (button.Connect("pressed", this, "startPolling", actionNameArray))
                         |> logErr
                         |> ignore)
 
