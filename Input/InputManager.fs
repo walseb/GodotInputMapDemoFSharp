@@ -71,10 +71,10 @@ module ConfigManagement =
                 InputMap.ActionEraseEvent(actionName, eventToRemove)
 
             InputMap.GetActionList(actionName)
-            |> Array.iter (fun currentEvent -> if currentEvent :? InputEventKey then removeEvent actionName (currentEvent :?> InputEventKey))
+            |> Seq.iter (fun currentEvent -> if currentEvent :? InputEventKey then removeEvent actionName (currentEvent :?> InputEventKey))
 
             InputMap.GetActionList(actionName)
-            |> Array.iter (fun currentEvent -> if currentEvent :? InputEventMouseButton then removeEvent actionName (currentEvent :?> InputEventMouseButton))
+            |> Seq.iter (fun currentEvent -> if currentEvent :? InputEventMouseButton then removeEvent actionName (currentEvent :?> InputEventMouseButton))
 
         let addAction(config : ConfigFile) actionName =
             let getInputEventFromConfig (config : ConfigFile) actionName =
